@@ -9,9 +9,6 @@
   const finalScoreEl = document.getElementById('final-score');
   const bestScoreEl = document.getElementById('best-score');
   const playAgainBtn = document.getElementById('play-again-btn');
-  const audioControls = document.getElementById('audio-controls');
-  const musicToggleBtn = document.getElementById('music-toggle-btn');
-  const musicVolumeInput = document.getElementById('music-volume');
 
   // Logical game dimensions matching the 720p portrait reference viewport
   const WIDTH = 720;
@@ -38,8 +35,6 @@
 
   const CRASH_DELAY_MS = 380; // Time between impact explosion and YOU FAILED! modal
   const BEST_STORAGE_KEY = 'balayya_flappy_best_score';
-  const MUSIC_ENABLED_KEY = 'balayya_music_enabled';
-  const MUSIC_VOLUME_KEY = 'balayya_music_volume';
 
   // Assets
   const headImg = new Image();
@@ -48,19 +43,15 @@
   const bottleImg = new Image();
   bottleImg.src = 'assets/mansion_house_bottle.png';
 
+  // Single background audio instance tied strictly to active gameplay
   const bgmAudio = new Audio('assets/ne_kanti_chuppuloki.mp3');
-  bgmAudio.loop = true;
+  bgmAudio.loop = false;
+  bgmAudio.volume = 0.85;
   bgmAudio.preload = 'auto';
 
   const failAudio = new Audio('assets/fail_dialogue.mp3');
   failAudio.volume = 1.0;
   failAudio.preload = 'auto';
-
-  let musicEnabled = localStorage.getItem(MUSIC_ENABLED_KEY) !== 'false';
-  const savedVol = parseFloat(localStorage.getItem(MUSIC_VOLUME_KEY));
-  let musicVolume = Number.isFinite(savedVol) ? Math.min(1, Math.max(0, savedVol)) : 0.8;
-  let bgmStarted = false;
-  bgmAudio.volume = musicVolume;
 
   // Background parallax clouds (translucent overlapping circle puffs)
   const clouds = [
@@ -102,7 +93,6 @@
   let trailParticles = [];
   let crashParticles = [];
   let crashTimer = 0;
-  let modalShowTimestamp = 0;
   let lastTime = performance.now();
 
   function safePlay(audio, restart = false) {
@@ -113,6 +103,7 @@
     if (promise && typeof promise.catch === 'function') {
       promise.catch(() => {});
     }
+    return promise;
   }
 
   function stopAudio(audio) {
@@ -120,25 +111,48 @@
     audio.currentTime = 0;
   }
 
+  function stopBackgroundMusic() {
+    stopAudio(bgmAudio);
+  }
+
+  function startBackgroundMusic(fromBeginning = false) {
+    if (gameState !== 'playing') {
+      stopBackgroundMusic();
+      return;
+    }
+    if (fromBeginning) {
+      bgmAudio.currentTime = 0;
+    }
+    if (!fromBeginning && !bgmAudio.paused) {
+      return;
+    }
+    const playPromise = safePlay(bgmAudio, fromBeginning);
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.then(() => {
+        if (gameState !== 'playing') {
+          stopBackgroundMusic();
+        }
+      }).catch(() => {});
+    }
+  }
+
+  // Enforce single-instance playback strictly while actively playing
+  bgmAudio.addEventListener('play', () => {
+    if (gameState !== 'playing') {
+      stopBackgroundMusic();
+    }
+  });
+
+  bgmAudio.addEventListener('ended', () => {
+    if (gameState === 'playing') {
+      startBackgroundMusic(true);
+    } else {
+      stopBackgroundMusic();
+    }
+  });
+
   function updateScoreUI() {
     scoreEl.textContent = String(score);
-  }
-
-  function updateAudioControlsUI() {
-    musicToggleBtn.textContent = musicEnabled ? 'Music: ON' : 'Music: OFF';
-    musicToggleBtn.setAttribute('aria-pressed', String(musicEnabled));
-    musicVolumeInput.value = String(Math.round(musicVolume * 100));
-    bgmAudio.volume = musicVolume;
-  }
-
-  function ensureMusicPlaying() {
-    if (!musicEnabled) return;
-    if (!bgmStarted) {
-      bgmStarted = true;
-      safePlay(bgmAudio, true);
-    } else if (bgmAudio.paused) {
-      safePlay(bgmAudio, false);
-    }
   }
 
   function spawnFlapParticles() {
@@ -202,9 +216,9 @@
     if (gameState === 'ready') {
       gameState = 'playing';
       spawnTimer = FIRST_PIPE_DELAY;
-      ensureMusicPlaying();
-    } else {
-      ensureMusicPlaying();
+      startBackgroundMusic(true);
+    } else if (gameState === 'playing' && bgmAudio.paused) {
+      startBackgroundMusic(false);
     }
 
     player.vy = FLAP_VELOCITY;
@@ -217,12 +231,13 @@
     gameState = 'crashing';
     crashTimer = 0;
     player.vy = -180;
+    stopBackgroundMusic();
     spawnCrashParticles();
   }
 
   function showGameOver() {
     gameState = 'gameover';
-    modalShowTimestamp = performance.now();
+    stopBackgroundMusic();
 
     if (score > bestScore) {
       bestScore = score;
@@ -239,6 +254,8 @@
 
   function restartGame() {
     stopAudio(failAudio);
+    stopBackgroundMusic();
+
     score = 0;
     updateScoreUI();
     scoreEl.classList.remove('hidden');
@@ -254,7 +271,7 @@
     gameState = 'playing';
 
     spawnFlapParticles();
-    ensureMusicPlaying();
+    startBackgroundMusic(true);
   }
 
   function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
@@ -540,61 +557,19 @@
 
   // Controls: Pointer/Touch anywhere on game area, Space/ArrowUp/W on keyboard
   wrapper.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('#game-over-overlay') || e.target.closest('#audio-controls')) return;
+    if (e.target.closest('#game-over-overlay')) return;
     e.preventDefault();
     flap();
-  });
-
-  ['pointerdown', 'mousedown', 'touchstart', 'click'].forEach((evtName) => {
-    audioControls.addEventListener(evtName, (e) => {
-      e.stopPropagation();
-    });
-  });
-
-  musicToggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    musicEnabled = !musicEnabled;
-    localStorage.setItem(MUSIC_ENABLED_KEY, String(musicEnabled));
-
-    if (musicEnabled) {
-      if (musicVolume === 0) {
-        musicVolume = 0.5;
-        localStorage.setItem(MUSIC_VOLUME_KEY, String(musicVolume));
-      }
-      ensureMusicPlaying();
-    } else {
-      bgmAudio.pause();
-    }
-    updateAudioControlsUI();
-    musicToggleBtn.blur();
-  });
-
-  musicVolumeInput.addEventListener('input', (e) => {
-    e.stopPropagation();
-    musicVolume = Math.min(1, Math.max(0, Number(e.target.value) / 100));
-    bgmAudio.volume = musicVolume;
-    localStorage.setItem(MUSIC_VOLUME_KEY, String(musicVolume));
-  });
-
-  musicVolumeInput.addEventListener('change', () => {
-    musicVolumeInput.blur();
   });
 
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
       e.preventDefault();
-      if (gameState === 'gameover') {
-        if (performance.now() - modalShowTimestamp > 450) {
-          restartGame();
-        }
+      if (gameState !== 'ready' && gameState !== 'playing') {
         return;
       }
       if (!e.repeat) {
         flap();
-      }
-    } else if (e.code === 'Enter' && gameState === 'gameover') {
-      if (performance.now() - modalShowTimestamp > 450) {
-        restartGame();
       }
     }
   });
@@ -605,6 +580,5 @@
   });
 
   updateScoreUI();
-  updateAudioControlsUI();
   requestAnimationFrame(gameLoop);
 })();
