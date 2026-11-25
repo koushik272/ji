@@ -56,6 +56,58 @@ body {
   opacity: 0;
 }
 
+#audio-controls {
+  position: absolute;
+  top: 2.2%;
+  right: 3%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  cursor: default;
+}
+
+#music-toggle-btn {
+  border: 1.5px solid #2b364a;
+  border-radius: 999px;
+  background: rgba(20, 28, 43, 0.86);
+  color: #f3f5f8;
+  font-family: 'Rubik', 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(11px, 1.55vh, 13px);
+  letter-spacing: 0.4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+#music-toggle-btn[aria-pressed="false"] {
+  color: #9aa6ba;
+  border-color: #242d3e;
+  background: rgba(15, 20, 31, 0.78);
+}
+
+#music-toggle-btn:hover {
+  border-color: #46608a;
+}
+
+#music-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+#music-volume {
+  width: clamp(82px, 12vh, 112px);
+  height: 6px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+  touch-action: pan-x;
+  background: rgba(20, 28, 43, 0.85);
+  border-radius: 999px;
+}
+
 #game-over-overlay {
   position: absolute;
   inset: 0;
