@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Balayya Babu Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+Telugu:wght@500;700&family=Rubik:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <canvas id="game-canvas" width="720" height="1420"></canvas>
+
+    <div id="score-display" aria-live="polite">0</div>
+
+    <div id="game-over-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="fail-title">
+      <div class="fail-card">
+        <h1 id="fail-title" class="fail-title">YOU FAILED!</h1>
+        <p class="fail-dialogue">ల*** కొడక గుడ్డలూడదీసి కొడతా!</p>
+
+        <div class="meme-frame">
+          <img src="assets/balayya_gameover.png" alt="Balayya Babu" class="meme-img" draggable="false" />
+        </div>
+
+        <div class="stats-box">
+          <div class="stat-col">
+            <span class="stat-label">SCORE</span>
+            <span id="final-score" class="stat-value">0</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-label">BEST</span>
+            <span id="best-score" class="stat-value">0</span>
+          </div>
+        </div>
+
+        <button id="play-again-btn" type="button">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

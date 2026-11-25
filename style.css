@@ -1,0 +1,190 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #080d16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Rubik', 'Fredoka', system-ui, -apple-system, sans-serif;
+}
+
+#game-wrapper {
+  position: relative;
+  width: min(100vw, calc(100vh * 720 / 1420));
+  height: min(100vh, calc(100vw * 1420 / 720));
+  overflow: hidden;
+  background: #131d31;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.75);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#score-display {
+  position: absolute;
+  top: 2.2%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Rubik', 'Fredoka', 'Arial Black', sans-serif;
+  font-weight: 900;
+  font-size: clamp(28px, 7.2vh, 58px);
+  line-height: 1;
+  color: #f3f5f8;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.2s ease;
+}
+
+#score-display.hidden {
+  opacity: 0;
+}
+
+#game-over-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 10, 18, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5%;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.22s ease;
+  cursor: default;
+}
+
+#game-over-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fail-card {
+  width: 100%;
+  background: #141c2b;
+  border: 1.5px solid #2b364a;
+  border-radius: 26px;
+  padding: 6.5% 5.5% 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.72);
+  transform: scale(1);
+  transition: transform 0.22s ease;
+}
+
+#game-over-overlay.hidden .fail-card {
+  transform: scale(0.95);
+}
+
+.fail-title {
+  font-family: 'Rubik', 'Fredoka', 'Arial Black', sans-serif;
+  font-weight: 900;
+  font-size: clamp(26px, 5.2vh, 46px);
+  letter-spacing: 1px;
+  color: #ee6363;
+  text-shadow: 0 0 22px rgba(238, 99, 99, 0.38);
+  margin-bottom: 1.8%;
+  text-align: center;
+}
+
+.fail-dialogue {
+  font-family: 'Noto Sans Telugu', 'Nirmala UI', 'Gautami', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(13px, 2.35vh, 20px);
+  color: #d6dde8;
+  text-align: center;
+  margin-bottom: 5.5%;
+  line-height: 1.35;
+}
+
+.meme-frame {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: #1b0b04;
+  margin-bottom: 5.5%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.meme-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.stats-box {
+  width: 100%;
+  background: #1f2836;
+  border: 1.5px solid #2f3a4d;
+  border-radius: 16px;
+  padding: 4.5% 6%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 5.5%;
+}
+
+.stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: clamp(11px, 1.7vh, 14px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8f9bb0;
+}
+
+.stat-value {
+  font-family: 'Rubik', 'Fredoka', 'Arial Black', sans-serif;
+  font-size: clamp(24px, 4.2vh, 36px);
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+#play-again-btn {
+  width: 100%;
+  padding: 4.8% 0;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #2764eb 0%, #1947be 100%);
+  color: #ffffff;
+  font-family: 'Rubik', 'Fredoka', sans-serif;
+  font-weight: 800;
+  font-size: clamp(16px, 2.8vh, 24px);
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45);
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+#play-again-btn:hover {
+  filter: brightness(1.08);
+}
+
+#play-again-btn:active {
+  transform: scale(0.98);
+}
